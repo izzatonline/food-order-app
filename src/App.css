@@ -37,20 +37,6 @@
     }
 }
 
-.adminPage {
-    background-image: url("/public/image/bg-smoke.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    height: 100vh;
-}
-
-.usersPage {
-    background-image: url("/public/image/bg-smoke.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    height: 100vh;
-}
-
 /* Sticky Footer Styles */
 body,
 html {

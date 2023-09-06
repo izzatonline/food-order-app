@@ -3,6 +3,7 @@ import ItemsContext from "./items-context";
 
 const ItemsProvider = (props) => {
     const [itemsData, setItemsData] = useState([]);
+    const [switchPage, setSwitchPage] = useState(true);
 
     const addNewItemHandler = (item) => {
         setItemsData((prevItems) => [...prevItems, item]);
@@ -14,10 +15,16 @@ const ItemsProvider = (props) => {
         );
     };
 
+    const togglePageHandler = () => {
+        setSwitchPage((prevSwitch) => !prevSwitch);
+    };
+
     const contextValue = {
         itemsData: itemsData,
+        switchPage: switchPage, // providing switchPage state
         addNewItem: addNewItemHandler,
-        deleteItem: deleteItemHandler,
+        removeItem: deleteItemHandler,
+        togglePage: togglePageHandler, // providing toggle function
     };
 
     return (

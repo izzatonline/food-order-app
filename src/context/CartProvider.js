@@ -1,31 +1,51 @@
-// CartProvider.js
 import React, { useReducer } from "react";
 import CartContext from "./cart-context";
 
-// A basic reducer to manage cart operations
 const cartReducer = (state, action) => {
     switch (action.type) {
         case "ADD":
-            // logic to add item to cart
-            const updatedItems = state.items.concat(action.item);
-            const updatedTotalAmount = state.totalAmount + action.item.amount;
+            const existingCartItemIndex = state.items.findIndex(
+                (item) => item.id === action.item.id
+            );
+            const existingCartItem = state.items[existingCartItemIndex];
+            let updatedItems;
+
+            if (existingCartItem) {
+                const updatedItem = {
+                    ...existingCartItem,
+                    amount: existingCartItem.amount + action.item.amount,
+                };
+                updatedItems = [...state.items];
+                updatedItems[existingCartItemIndex] = updatedItem;
+            } else {
+                updatedItems = state.items.concat(action.item);
+            }
+
+            const updatedTotalAmount =
+                state.totalAmount + action.item.price * action.item.amount;
             return {
                 items: updatedItems,
                 totalAmount: updatedTotalAmount,
             };
 
         case "REMOVE":
-            // logic to remove item from cart by ID
-            const updatedItemIndex = state.items.findIndex(
+            const itemIndex = state.items.findIndex(
                 (item) => item.id === action.id
             );
-            const updatedItem = state.items[updatedItemIndex];
-            const decreasedTotalAmount = state.totalAmount - updatedItem.amount;
-            const updatedItemsArray = [...state.items];
-            updatedItemsArray.splice(updatedItemIndex, 1);
+            const item = state.items[itemIndex];
+            const currentAmount = item.amount;
+            let newTotalAmount = state.totalAmount - item.price;
+            let newItems;
+            if (currentAmount > 1) {
+                const updatedItem = { ...item, amount: currentAmount - 1 };
+                newItems = [...state.items];
+                newItems[itemIndex] = updatedItem;
+            } else {
+                newItems = state.items.filter((item) => item.id !== action.id);
+            }
             return {
-                items: updatedItemsArray,
-                totalAmount: decreasedTotalAmount,
+                items: newItems,
+                totalAmount: newTotalAmount,
             };
 
         case "CLEAR":

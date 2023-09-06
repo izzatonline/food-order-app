@@ -14,7 +14,7 @@ const Footer = (props) => {
             {...props}
             sx={{
                 width: "100%",
-                position: "absolute",
+                position: "sticky",
                 bottom: 0,
                 backgroundColor: "lightgray",
             }}
