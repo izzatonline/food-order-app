@@ -23,7 +23,7 @@ const ItemsProvider = (props) => {
         itemsData: itemsData,
         switchPage: switchPage, // providing switchPage state
         addNewItem: addNewItemHandler,
-        removeItem: deleteItemHandler,
+        deleteItem: deleteItemHandler,
         togglePage: togglePageHandler, // providing toggle function
     };
 
