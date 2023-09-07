@@ -1,22 +1,28 @@
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import Cart from "../components/Cart";
-// import Banner from "../components/Banner";
-// import AboutUs from "../components/AboutUs";
 import Meals from "../components/Meals";
 import AppBarComponent from "../components/AppBarComponent";
 import { Grid } from "@mui/material";
 import CartContext from "../context/cart-context";
+import ItemsContext from "../context/items-context";
 // import "../App.css";
 
 const Users = () => {
+    const itemsCtx = useContext(ItemsContext);
     const [isValid, setIsValid] = useState(false);
+    const cartCtx = useContext(CartContext);
+
+    if (itemsCtx.switchPage) {
+        return null;
+    }
+
     const showModalHandler = () => {
         setIsValid(true);
     };
     const hideModalHandler = () => {
         setIsValid(false);
     };
-    const cartCtx = useContext(CartContext);
+
     return (
         <Grid container className="main-container" direction={"column"}>
             <Grid

@@ -12,6 +12,10 @@ const Admin = () => {
     const itemsCtx = useContext(ItemsContext);
     const [open, setOpen] = React.useState(false);
 
+    if (!itemsCtx.switchPage) {
+        return null;
+    }
+
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
