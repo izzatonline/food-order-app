@@ -7,6 +7,15 @@ import {
     DialogContent,
     DialogTitle,
 } from "@mui/material";
+import { createClient } from "contentful-management";
+
+const SPACE_ID = "8qhx6lxj8iz9";
+const ACCESS_TOKEN = "CFPAT-O0LKlsAaYGkI1YnVhM1TfBUeI5OkSRjHTLGPDC3BqR0";
+const CONTENT_TYPE_ID = "7jvmhc1XArPBfdGlXMfe41"; // If you have a specific content type for the images
+
+const client = createClient({
+    accessToken: ACCESS_TOKEN,
+});
 
 const Form = (props) => {
     const [enteredName, setEnteredName] = useState("");
@@ -17,34 +26,34 @@ const Form = (props) => {
     const handleImageUpload = async (event) => {
         const file = event.target.files[0];
 
-        if (!file) return;
+        // Create the asset on Contentful
+        const space = await client.getSpace(SPACE_ID);
+        const asset = await space.createAssetFromFiles({
+            fields: {
+                title: {
+                    "en-US": file.name,
+                },
+                description: {
+                    "en-US": "Some description about the image", // You can make this dynamic
+                },
+                file: {
+                    "en-US": {
+                        contentType: file.type,
+                        fileName: file.name,
+                        file: file,
+                    },
+                },
+            },
+        });
 
-        const formData = new FormData();
-        formData.append("image", file);
+        await asset.processForAllLocales({ processingCheckWait: 2000 }); // Process the uploaded asset
+        await asset.publish(); // You can also decide to publish it immediately
 
-        const apiKey = "6d207e02198a847aa98d0a2a901485a5";
-        const endpoint = `https://api.freeimage.host/upload?key=${apiKey}`;
-
-        try {
-            const response = await fetch(endpoint, {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (data.success && data.image) {
-                setImageData(data.image.url);
-            } else {
-                console.error(
-                    "Failed to upload image. Reason:",
-                    data.message || "Unknown reason"
-                );
-            }
-        } catch (error) {
-            console.error("Error uploading the image:", error.message);
-            console.error(error);
-        }
+        // Now, the asset is available in Contentful, and you can use its ID for references or its URL for display
+        setFoodData((prevData) => ({
+            ...prevData,
+            image: asset.fields.file["en-US"].url, // Or asset.sys.id if you want to save the ID
+        }));
     };
 
     const handleSubmit = (event) => {
