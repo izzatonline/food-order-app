@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createClient } from "contentful-management";
 import {
     Button,
     TextField,
@@ -7,14 +8,14 @@ import {
     DialogContent,
     DialogTitle,
 } from "@mui/material";
-import { createClient } from "contentful-management";
 
-const SPACE_ID = "8qhx6lxj8iz9";
-const ACCESS_TOKEN = "CFPAT-O0LKlsAaYGkI1YnVhM1TfBUeI5OkSRjHTLGPDC3BqR0";
-const CONTENT_TYPE_ID = "7jvmhc1XArPBfdGlXMfe41"; // If you have a specific content type for the images
+const CONTENTFUL_SPACE_ID = "8qhx6lxj8iz9";
+const CONTENTFUL_ENVIRONMENT_ID = "master";
+const CONTENTFUL_CMA_TOKEN =
+    "CFPAT-5gNA4_L4uVRbcrGykKSVOgr9FrS7oqpIDg71aXPVIDU";
 
 const client = createClient({
-    accessToken: ACCESS_TOKEN,
+    accessToken: CONTENTFUL_CMA_TOKEN,
 });
 
 const Form = (props) => {
@@ -26,34 +27,45 @@ const Form = (props) => {
     const handleImageUpload = async (event) => {
         const file = event.target.files[0];
 
-        // Create the asset on Contentful
-        const space = await client.getSpace(SPACE_ID);
-        const asset = await space.createAssetFromFiles({
-            fields: {
-                title: {
-                    "en-US": file.name,
-                },
-                description: {
-                    "en-US": "Some description about the image", // You can make this dynamic
-                },
-                file: {
-                    "en-US": {
-                        contentType: file.type,
-                        fileName: file.name,
-                        file: file,
+        if (file) {
+            try {
+                const space = await client.getSpace(CONTENTFUL_SPACE_ID);
+                const environment = await space.getEnvironment(
+                    CONTENTFUL_ENVIRONMENT_ID
+                );
+
+                const asset = await environment.createAssetFromFiles({
+                    fields: {
+                        title: {
+                            "en-US": file.name,
+                        },
+                        description: {
+                            "en-US": "Uploaded Image Description",
+                        },
+                        file: {
+                            "en-US": {
+                                contentType: file.type,
+                                fileName: file.name,
+                                file: file,
+                            },
+                        },
                     },
-                },
-            },
-        });
+                });
 
-        await asset.processForAllLocales({ processingCheckWait: 2000 }); // Process the uploaded asset
-        await asset.publish(); // You can also decide to publish it immediately
+                const processedAsset = await asset.processForAllLocales();
 
-        // Now, the asset is available in Contentful, and you can use its ID for references or its URL for display
-        setFoodData((prevData) => ({
-            ...prevData,
-            image: asset.fields.file["en-US"].url, // Or asset.sys.id if you want to save the ID
-        }));
+                // Check if asset is already published
+                if (processedAsset.sys.publishedVersion) {
+                    console.log("Asset is already published.");
+                } else {
+                    await processedAsset.publish();
+                    const imageUrl = processedAsset.fields.file["en-US"].url;
+                    setImageData("https:" + imageUrl);
+                }
+            } catch (error) {
+                console.error("Error uploading the image:", error);
+            }
+        }
     };
 
     const handleSubmit = (event) => {

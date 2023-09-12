@@ -30,7 +30,7 @@ const MealsItem = ({ food, admin, onDelete }) => {
                 <CardMedia
                     component="img"
                     height="194"
-                    image={`data:image/jpeg;base64,${food.image}`}
+                    image={food.image}
                     alt={food.name}
                 />
                 <Grid
@@ -66,9 +66,15 @@ const MealsItem = ({ food, admin, onDelete }) => {
                 </Grid>
             </CardActionArea>
             <CardActions disableSpacing>
-                <Button size="small" color="primary" onClick={handleAddToCart}>
-                    Add to Cart
-                </Button>
+                {!admin && (
+                    <Button
+                        size="small"
+                        color="primary"
+                        onClick={handleAddToCart}
+                    >
+                        Add to Cart
+                    </Button>
+                )}
                 {admin && (
                     <Button
                         size="small"
