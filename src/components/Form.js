@@ -22,7 +22,7 @@ const Form = (props) => {
     const [enteredName, setEnteredName] = useState("");
     const [enteredDescription, setEnteredDescription] = useState("");
     const [enteredPrice, setEnteredPrice] = useState("");
-    const [imageData, setImageData] = useState("");
+    const [imageURL, setImageURL] = useState(""); // Changed name to imageURL
 
     const handleImageUpload = async (event) => {
         const file = event.target.files[0];
@@ -34,7 +34,7 @@ const Form = (props) => {
                     CONTENTFUL_ENVIRONMENT_ID
                 );
 
-                const asset = await environment.createAssetFromFiles({
+                let asset = await environment.createAssetFromFiles({
                     fields: {
                         title: {
                             "en-US": file.name,
@@ -52,18 +52,34 @@ const Form = (props) => {
                     },
                 });
 
-                const processedAsset = await asset.processForAllLocales();
+                await asset.processForAllLocales();
 
-                // Check if asset is already published
-                if (processedAsset.sys.publishedVersion) {
-                    console.log("Asset is already published.");
-                } else {
-                    await processedAsset.publish();
-                    const imageUrl = processedAsset.fields.file["en-US"].url;
-                    setImageData("https:" + imageUrl);
+                // Fetch the latest version of the asset before publishing
+                asset = await environment.getAsset(asset.sys.id);
+
+                // Now you're working with the instance returned by the SDK
+                // This should have the `.publish()` method
+                try {
+                    await asset.publish();
+                } catch (publishError) {
+                    console.error("Error publishing the asset:", publishError);
                 }
+
+                // Debugging: Check the published version after publishing
+                const updatedAsset = await environment.getAsset(asset.sys.id);
+                console.log(
+                    "Asset published version:",
+                    updatedAsset.sys.publishedVersion
+                );
+
+                // Set the imageURL to the Contentful URL
+                const imageUrl = asset.fields.file["en-US"].url;
+                setImageURL(`https:${imageUrl}`);
             } catch (error) {
-                console.error("Error uploading the image:", error);
+                console.error(
+                    "Error uploading the image to Contentful:",
+                    error
+                );
             }
         }
     };
@@ -71,12 +87,14 @@ const Form = (props) => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
+        const newFoodId = Math.random().toString();
+
         const newFood = {
-            id: Math.random().toString(),
+            id: newFoodId,
             name: enteredName,
             description: enteredDescription,
             price: parseFloat(enteredPrice).toFixed(2),
-            image: imageData,
+            image: imageURL,
         };
 
         props.onSubmit(newFood);
@@ -87,7 +105,7 @@ const Form = (props) => {
         setEnteredName("");
         setEnteredDescription("");
         setEnteredPrice("");
-        setImageData("");
+        setImageURL("");
     };
 
     return (

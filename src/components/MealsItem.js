@@ -15,6 +15,10 @@ import CartContext from "../context/cart-context";
 const MealsItem = ({ food, admin, onDelete }) => {
     const cartCtx = useContext(CartContext);
 
+    // Since we are saving the entire item, including the Contentful image URL, in local storage,
+    // there's no need to get the image from local storage here. We can use food.image directly.
+    // const imageUrl = food.image;
+
     const handleAddToCart = () => {
         cartCtx.addItem({
             id: food.id,
@@ -22,6 +26,11 @@ const MealsItem = ({ food, admin, onDelete }) => {
             price: food.price,
             amount: 1,
         });
+    };
+
+    // Handle delete
+    const handleDelete = () => {
+        onDelete(food.id); // Continue with the deletion process
     };
 
     return (
@@ -79,7 +88,7 @@ const MealsItem = ({ food, admin, onDelete }) => {
                     <Button
                         size="small"
                         color="secondary"
-                        onClick={() => onDelete(food.id)}
+                        onClick={handleDelete}
                     >
                         Delete
                     </Button>
