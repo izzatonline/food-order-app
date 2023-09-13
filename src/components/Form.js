@@ -22,11 +22,10 @@ const Form = (props) => {
     const [enteredName, setEnteredName] = useState("");
     const [enteredDescription, setEnteredDescription] = useState("");
     const [enteredPrice, setEnteredPrice] = useState("");
-    const [imageURL, setImageURL] = useState("");
-    const [selectedFile, setSelectedFile] = useState(null); // State for the selected file
+    const [imageData, setImageData] = useState("");
 
-    const handleImageUpload = async () => {
-        const file = selectedFile; // Use the state directly
+    const handleImageUpload = async (event) => {
+        const file = event.target.files[0];
 
         if (file) {
             try {
@@ -35,7 +34,7 @@ const Form = (props) => {
                     CONTENTFUL_ENVIRONMENT_ID
                 );
 
-                let asset = await environment.createAssetFromFiles({
+                const asset = await environment.createAssetFromFiles({
                     fields: {
                         title: {
                             "en-US": file.name,
@@ -53,38 +52,18 @@ const Form = (props) => {
                     },
                 });
 
-                await asset.processForAllLocales();
+                const processedAsset = await asset.processForAllLocales();
 
-                asset = await environment.getAsset(asset.sys.id);
-
-                try {
-                    await asset.publish();
-                } catch (publishError) {
-                    console.error("Error publishing the asset:", publishError);
-                }
-
-                const updatedAsset = await environment.getAsset(asset.sys.id);
-                console.log(
-                    "Asset published version:",
-                    updatedAsset.sys.publishedVersion
-                );
-
-                if (
-                    asset.fields.file &&
-                    asset.fields.file["en-US"] &&
-                    asset.fields.file["en-US"].url
-                ) {
-                    const imageUrl = asset.fields.file["en-US"].url;
-                    setImageURL(`https:${imageUrl}`);
-                    console.log("Retrieved asset URL:", imageUrl);
+                // Check if asset is already published
+                if (processedAsset.sys.publishedVersion) {
+                    console.log("Asset is already published.");
                 } else {
-                    console.error("Asset URL is not available.");
+                    await processedAsset.publish();
+                    const imageUrl = processedAsset.fields.file["en-US"].url;
+                    setImageData("https:" + imageUrl);
                 }
             } catch (error) {
-                console.error(
-                    "Error uploading the image to Contentful:",
-                    error
-                );
+                console.error("Error uploading the image:", error);
             }
         }
     };
@@ -92,14 +71,12 @@ const Form = (props) => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        const newFoodId = Math.random().toString();
-
         const newFood = {
-            id: newFoodId,
+            id: Math.random().toString(),
             name: enteredName,
             description: enteredDescription,
             price: parseFloat(enteredPrice).toFixed(2),
-            image: imageURL,
+            image: imageData,
         };
 
         props.onSubmit(newFood);
@@ -110,8 +87,7 @@ const Form = (props) => {
         setEnteredName("");
         setEnteredDescription("");
         setEnteredPrice("");
-        setImageURL("");
-        setSelectedFile(null); // Resetting the selected file as well
+        setImageData("");
     };
 
     return (
@@ -146,10 +122,7 @@ const Form = (props) => {
                 <input
                     type="file"
                     accept="image/*"
-                    onChange={(event) => {
-                        setSelectedFile(event.target.files[0]);
-                        handleImageUpload();
-                    }}
+                    onChange={handleImageUpload}
                 />
             </DialogContent>
             <DialogActions>
