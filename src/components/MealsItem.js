@@ -15,6 +15,8 @@ import CartContext from "../context/cart-context";
 const MealsItem = ({ food, admin, onDelete }) => {
     const cartCtx = useContext(CartContext);
 
+    console.log("Image URL for food:", food.name, "is:", food.image);
+
     // Since we are saving the entire item, including the Contentful image URL, in local storage,
     // there's no need to get the image from local storage here. We can use food.image directly.
     // const imageUrl = food.image;

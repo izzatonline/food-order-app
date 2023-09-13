@@ -22,10 +22,11 @@ const Form = (props) => {
     const [enteredName, setEnteredName] = useState("");
     const [enteredDescription, setEnteredDescription] = useState("");
     const [enteredPrice, setEnteredPrice] = useState("");
-    const [imageURL, setImageURL] = useState(""); // Changed name to imageURL
+    const [imageURL, setImageURL] = useState("");
+    const [selectedFile, setSelectedFile] = useState(null); // State for the selected file
 
-    const handleImageUpload = async (event) => {
-        const file = event.target.files[0];
+    const handleImageUpload = async () => {
+        const file = selectedFile; // Use the state directly
 
         if (file) {
             try {
@@ -54,27 +55,31 @@ const Form = (props) => {
 
                 await asset.processForAllLocales();
 
-                // Fetch the latest version of the asset before publishing
                 asset = await environment.getAsset(asset.sys.id);
 
-                // Now you're working with the instance returned by the SDK
-                // This should have the `.publish()` method
                 try {
                     await asset.publish();
                 } catch (publishError) {
                     console.error("Error publishing the asset:", publishError);
                 }
 
-                // Debugging: Check the published version after publishing
                 const updatedAsset = await environment.getAsset(asset.sys.id);
                 console.log(
                     "Asset published version:",
                     updatedAsset.sys.publishedVersion
                 );
 
-                // Set the imageURL to the Contentful URL
-                const imageUrl = asset.fields.file["en-US"].url;
-                setImageURL(`https:${imageUrl}`);
+                if (
+                    asset.fields.file &&
+                    asset.fields.file["en-US"] &&
+                    asset.fields.file["en-US"].url
+                ) {
+                    const imageUrl = asset.fields.file["en-US"].url;
+                    setImageURL(`https:${imageUrl}`);
+                    console.log("Retrieved asset URL:", imageUrl);
+                } else {
+                    console.error("Asset URL is not available.");
+                }
             } catch (error) {
                 console.error(
                     "Error uploading the image to Contentful:",
@@ -106,6 +111,7 @@ const Form = (props) => {
         setEnteredDescription("");
         setEnteredPrice("");
         setImageURL("");
+        setSelectedFile(null); // Resetting the selected file as well
     };
 
     return (
@@ -140,7 +146,10 @@ const Form = (props) => {
                 <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={(event) => {
+                        setSelectedFile(event.target.files[0]);
+                        handleImageUpload();
+                    }}
                 />
             </DialogContent>
             <DialogActions>

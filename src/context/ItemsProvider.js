@@ -6,20 +6,23 @@ const ItemsProvider = (props) => {
     const [itemsData, setItemsData] = useState(initialData);
     const [switchPage, setSwitchPage] = useState(true);
 
+    // useEffect to sync state with localStorage
     useEffect(() => {
         localStorage.setItem("itemsData", JSON.stringify(itemsData));
     }, [itemsData]);
 
     const addNewItemHandler = (item) => {
-        const updatedItems = [...itemsData, item];
-        setItemsData(updatedItems);
-        localStorage.setItem("itemsData", JSON.stringify(updatedItems));
+        console.log("Received new item:", item); // logging the incoming item
+
+        // Use the functional form of setState
+        setItemsData((prevItemsData) => [...prevItemsData, item]);
     };
 
     const deleteItemHandler = (itemId) => {
-        const updatedItems = itemsData.filter((item) => item.id !== itemId);
-        setItemsData(updatedItems);
-        localStorage.setItem("itemsData", JSON.stringify(updatedItems));
+        // Use the functional form of setState
+        setItemsData((prevItemsData) =>
+            prevItemsData.filter((item) => item.id !== itemId)
+        );
     };
 
     const togglePageHandler = () => {
