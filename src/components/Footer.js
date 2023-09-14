@@ -27,14 +27,14 @@ const Footer = (props) => {
         >
             {itemsCtx.switchPage && (
                 <BottomNavigationAction
-                    label="Admin"
-                    icon={<AdminPanelSettingsIcon />}
+                    label="Users"
+                    icon={<AccessibilityNewIcon />}
                 />
             )}
             {!itemsCtx.switchPage && (
                 <BottomNavigationAction
-                    label="Users"
-                    icon={<AccessibilityNewIcon />}
+                    label="Admin"
+                    icon={<AdminPanelSettingsIcon />}
                 />
             )}
         </BottomNavigation>

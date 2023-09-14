@@ -1,27 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ItemsContext from "./items-context";
 
 const ItemsProvider = (props) => {
-    const initialData = JSON.parse(localStorage.getItem("itemsData")) || [];
-    const [itemsData, setItemsData] = useState(initialData);
+    const [itemsData, setItemsData] = useState([]);
     const [switchPage, setSwitchPage] = useState(true);
 
-    // useEffect to sync state with localStorage
-    useEffect(() => {
-        localStorage.setItem("itemsData", JSON.stringify(itemsData));
-    }, [itemsData]);
-
     const addNewItemHandler = (item) => {
-        console.log("Received new item:", item); // logging the incoming item
-
-        // Use the functional form of setState
-        setItemsData((prevItemsData) => [...prevItemsData, item]);
+        setItemsData((prevItems) => [...prevItems, item]);
     };
 
     const deleteItemHandler = (itemId) => {
-        // Use the functional form of setState
-        setItemsData((prevItemsData) =>
-            prevItemsData.filter((item) => item.id !== itemId)
+        setItemsData((prevItems) =>
+            prevItems.filter((item) => item.id !== itemId)
         );
     };
 
@@ -31,10 +21,10 @@ const ItemsProvider = (props) => {
 
     const contextValue = {
         itemsData: itemsData,
-        switchPage: switchPage,
+        switchPage: switchPage, // providing switchPage state
         addNewItem: addNewItemHandler,
         deleteItem: deleteItemHandler,
-        togglePage: togglePageHandler,
+        togglePage: togglePageHandler, // providing toggle function
     };
 
     return (

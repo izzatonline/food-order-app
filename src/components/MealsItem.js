@@ -15,11 +15,9 @@ import CartContext from "../context/cart-context";
 const MealsItem = ({ food, admin, onDelete }) => {
     const cartCtx = useContext(CartContext);
 
-    console.log("Image URL for food:", food.name, "is:", food.image);
-
-    // Since we are saving the entire item, including the Contentful image URL, in local storage,
-    // there's no need to get the image from local storage here. We can use food.image directly.
-    // const imageUrl = food.image;
+    // Get image from localStorage or fall back to the provided URL
+    const imageFromLocalStorage = localStorage.getItem(food.id);
+    const imageUrl = imageFromLocalStorage ? imageFromLocalStorage : food.image;
 
     const handleAddToCart = () => {
         cartCtx.addItem({
@@ -30,9 +28,10 @@ const MealsItem = ({ food, admin, onDelete }) => {
         });
     };
 
-    // Handle delete
+    // Handle delete which includes removing image from local storage
     const handleDelete = () => {
-        onDelete(food.id); // Continue with the deletion process
+        localStorage.removeItem(food.id); // Removing image from local storage using the food ID as the key
+        onDelete(food.id); // Continue with the rest of the deletion process
     };
 
     return (
@@ -41,7 +40,7 @@ const MealsItem = ({ food, admin, onDelete }) => {
                 <CardMedia
                     component="img"
                     height="194"
-                    image={`data:image/jpeg;base64,${food.image}`}
+                    image={imageUrl}
                     alt={food.name}
                 />
                 <Grid
@@ -77,9 +76,15 @@ const MealsItem = ({ food, admin, onDelete }) => {
                 </Grid>
             </CardActionArea>
             <CardActions disableSpacing>
-                <Button size="small" color="primary" onClick={handleAddToCart}>
-                    Add to Cart
-                </Button>
+                {!admin && (
+                    <Button
+                        size="small"
+                        color="primary"
+                        onClick={handleAddToCart}
+                    >
+                        Add to Cart
+                    </Button>
+                )}
                 {admin && (
                     <Button
                         size="small"

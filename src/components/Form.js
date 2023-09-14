@@ -28,6 +28,16 @@ const Form = (props) => {
         const file = event.target.files[0];
 
         if (file) {
+            // Save image to local state for display
+            const reader = new FileReader();
+
+            reader.onload = function (evt) {
+                setImageData(evt.target.result);
+            };
+
+            reader.readAsDataURL(file);
+
+            // Upload image to Contentful
             try {
                 const space = await client.getSpace(CONTENTFUL_SPACE_ID);
                 const environment = await space.getEnvironment(
@@ -52,18 +62,17 @@ const Form = (props) => {
                     },
                 });
 
-                const processedAsset = await asset.processForAllLocales();
+                await asset.processForAllLocales();
 
                 // Check if asset is already published
-                if (processedAsset.sys.publishedVersion) {
-                    console.log("Asset is already published.");
-                } else {
-                    await processedAsset.publish();
-                    const imageUrl = processedAsset.fields.file["en-US"].url;
-                    setImageData("https:" + imageUrl);
+                if (!asset.sys.publishedVersion) {
+                    await asset.publish();
                 }
             } catch (error) {
-                console.error("Error uploading the image:", error);
+                console.error(
+                    "Error uploading the image to Contentful:",
+                    error
+                );
             }
         }
     };
@@ -71,13 +80,18 @@ const Form = (props) => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
+        const newFoodId = Math.random().toString();
+
         const newFood = {
-            id: Math.random().toString(),
+            id: newFoodId,
             name: enteredName,
             description: enteredDescription,
             price: parseFloat(enteredPrice).toFixed(2),
             image: imageData,
         };
+
+        // Store the image data in local storage using the food ID as the key
+        localStorage.setItem(newFoodId, imageData);
 
         props.onSubmit(newFood);
         resetForm();

@@ -1,4 +1,3 @@
-// Admin.js
 import React, { useContext } from "react";
 import AppBarComponent from "../components/AppBarComponent";
 import ItemsContext from "../context/items-context";
