@@ -6,7 +6,11 @@ import CartModal from "./Cart";
 
 const AppBarComponent = () => {
     const cartCtx = useContext(CartContext);
-    const numberOfCartItems = cartCtx.items.length;
+
+    const numberOfCartItems = cartCtx.items.reduce(
+        (acc, curr) => acc + curr.amount,
+        0
+    );
 
     const [isCartOpen, setIsCartOpen] = useState(false);
     const toggleCartModal = () => {
@@ -14,7 +18,7 @@ const AppBarComponent = () => {
     };
 
     return (
-        <AppBar position="static">
+        <AppBar position="sticky" style={{ top: 0 }}>
             <Toolbar>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                     Food Order App

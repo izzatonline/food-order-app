@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
     Card,
     CardContent,
@@ -9,15 +9,21 @@ import {
     CardActions,
     CardHeader,
     Grid,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
 } from "@mui/material";
 import CartContext from "../context/cart-context";
 
 const MealsItem = ({ food, admin, onDelete }) => {
     const cartCtx = useContext(CartContext);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-    // Get image from localStorage or fall back to the provided URL
-    const imageFromLocalStorage = localStorage.getItem(food.id);
-    const imageUrl = imageFromLocalStorage ? imageFromLocalStorage : food.image;
+    const itemFromLocalStorage = JSON.parse(localStorage.getItem(food.id));
+    const itemData = itemFromLocalStorage ? itemFromLocalStorage : food;
+    const imageUrl = itemData.image;
 
     const handleAddToCart = () => {
         cartCtx.addItem({
@@ -28,10 +34,22 @@ const MealsItem = ({ food, admin, onDelete }) => {
         });
     };
 
-    // Handle delete which includes removing image from local storage
     const handleDelete = () => {
-        localStorage.removeItem(food.id); // Removing image from local storage using the food ID as the key
-        onDelete(food.id); // Continue with the rest of the deletion process
+        localStorage.removeItem(food.id);
+        onDelete(food.id);
+    };
+
+    const openDeleteConfirmation = () => {
+        setOpenDeleteDialog(true);
+    };
+
+    const closeDeleteConfirmation = () => {
+        setOpenDeleteDialog(false);
+    };
+
+    const confirmDelete = () => {
+        handleDelete();
+        closeDeleteConfirmation();
     };
 
     return (
@@ -89,12 +107,30 @@ const MealsItem = ({ food, admin, onDelete }) => {
                     <Button
                         size="small"
                         color="secondary"
-                        onClick={handleDelete}
+                        onClick={openDeleteConfirmation}
                     >
                         Delete
                     </Button>
                 )}
             </CardActions>
+
+            <Dialog open={openDeleteDialog} onClose={closeDeleteConfirmation}>
+                <DialogTitle>{"Delete Confirmation"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete{" "}
+                        <strong>{food.name}</strong>?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDeleteConfirmation} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={confirmDelete} color="secondary">
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Card>
     );
 };

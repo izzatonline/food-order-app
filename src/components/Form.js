@@ -8,6 +8,7 @@ import {
     DialogContent,
     DialogTitle,
 } from "@mui/material";
+import { v4 as uuidv4 } from "uuid";
 
 const CONTENTFUL_SPACE_ID = "8qhx6lxj8iz9";
 const CONTENTFUL_ENVIRONMENT_ID = "master";
@@ -28,7 +29,6 @@ const Form = (props) => {
         const file = event.target.files[0];
 
         if (file) {
-            // Save image to local state for display
             const reader = new FileReader();
 
             reader.onload = function (evt) {
@@ -37,7 +37,6 @@ const Form = (props) => {
 
             reader.readAsDataURL(file);
 
-            // Upload image to Contentful
             try {
                 const space = await client.getSpace(CONTENTFUL_SPACE_ID);
                 const environment = await space.getEnvironment(
@@ -64,7 +63,6 @@ const Form = (props) => {
 
                 await asset.processForAllLocales();
 
-                // Check if asset is already published
                 if (!asset.sys.publishedVersion) {
                     await asset.publish();
                 }
@@ -80,7 +78,7 @@ const Form = (props) => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        const newFoodId = Math.random().toString();
+        const newFoodId = uuidv4();
 
         const newFood = {
             id: newFoodId,
@@ -90,8 +88,7 @@ const Form = (props) => {
             image: imageData,
         };
 
-        // Store the image data in local storage using the food ID as the key
-        localStorage.setItem(newFoodId, imageData);
+        localStorage.setItem(`item-${newFoodId}`, JSON.stringify(newFood));
 
         props.onSubmit(newFood);
         resetForm();

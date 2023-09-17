@@ -11,7 +11,7 @@ const Admin = () => {
     const itemsCtx = useContext(ItemsContext);
     const [open, setOpen] = React.useState(false);
 
-    if (!itemsCtx.switchPage) {
+    if (itemsCtx.switchPage) {
         return null;
     }
 
@@ -29,7 +29,7 @@ const Admin = () => {
                 className="header-container"
                 item
                 lg={1}
-                style={{ maxHeight: "10vh" }}
+                style={{ maxHeight: "10vh", overflowY: "visible" }}
                 marginBottom={2}
             >
                 <AppBarComponent />
@@ -44,7 +44,7 @@ const Admin = () => {
                     >
                         <SideBar style={{ overflowY: "scroll" }}></SideBar>
                     </Grid>
-                    <Grid className="result-container" item lg="9.5">
+                    <Grid className="result-container" item lg="8">
                         <Button
                             variant="contained"
                             color="primary"

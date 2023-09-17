@@ -12,8 +12,8 @@ function App() {
             <CartProvider>
                 <div className="main-content">
                     <Fragment>
-                        <Users />
                         <Admin />
+                        <Users />
                     </Fragment>
                 </div>
                 <Footer className="footer" />
